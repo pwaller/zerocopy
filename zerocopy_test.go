@@ -52,3 +52,79 @@ func TestZeroCopyFile(t *testing.T) {
 		log.Fatalln("len(result) !=", N, "it's", len(result))
 	}
 }
+
+const BLOCKSIZE = 1 * 1024
+
+func BenchmarkLargefileReadZC(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		func() {
+			b.StopTimer()
+
+			fd, err := os.Open("./largefile")
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer fd.Close()
+
+			zr, err := NewReader(fd)
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer zr.Close()
+			b.StartTimer()
+
+			var bs []byte
+			err = nil
+			var x byte
+			var ntot int
+			// b.ResetTimer()
+			// for i := 0; i < 100; i++ {
+			for {
+				bs, err = zr.Read(BLOCKSIZE)
+				ntot += len(bs)
+				if err != nil {
+					break
+				}
+				for _, b := range bs {
+					x += b
+				}
+			}
+			b.SetBytes(int64(ntot))
+			// log.Println("Sum byte =", x, b.N)
+		}()
+	}
+}
+
+func BenchmarkLargefileRead(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		func() {
+			b.StopTimer()
+			fd, err := os.Open("./largefile")
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer fd.Close()
+			b.StartTimer()
+
+			var bs []byte = make([]byte, BLOCKSIZE)
+			err = nil
+			var x byte
+			var n, ntot int
+
+			// for i := 0; i < 100; i++ {
+			for {
+				n, err = fd.Read(bs)
+				ntot += n
+				if err != nil {
+					break
+				}
+				for _, b := range bs {
+					x += b
+				}
+			}
+			b.SetBytes(int64(ntot))
+			// log.Println("Sum byte =", x)
+		}()
+	}
+}
