@@ -37,7 +37,7 @@ func NewReader(r io.Reader) (ReadCloser, error) {
 	}
 }
 
-// Helper to construct a zero-copy reader directly from a byte slice
+// Helper to construct a zero-copy reader directly from a byte slice.
 func NewReaderFromBytes(b []byte) (ReadCloser, error) {
 	return NewReader(bytes.NewReader(b))
 }
@@ -65,7 +65,7 @@ type bytesReader struct {
 	i *int
 }
 
-// Construct a new zerocopy.Reader
+// Construct a new zerocopy.Reader.
 func newBytesReader(r *bytes.Reader) (*bytesReader, error) {
 	old := reflect.ValueOf(r).Elem()
 	newSlice := copyPrivateByteSlice(old.FieldByName("s"))
@@ -94,7 +94,7 @@ func (r *bytesReader) Close() error {
 }
 
 // The mmapReader implementation works by using the bytesReader implemenation
-// on an mmap'ed byte-array
+// on an mmap'ed byte-array.
 type mmapReader struct {
 	Reader
 	mmap.MMap
@@ -121,7 +121,7 @@ func (m *mmapReader) Close() error {
 	return m.Unmap()
 }
 
-// Obtain a copy of a private byte slice
+// Obtain a copy of a private byte slice.
 func copyPrivateByteSlice(value reflect.Value) []byte {
 	newSlice := []byte{}
 	_newSlice := (*reflect.SliceHeader)(unsafe.Pointer(&newSlice))
