@@ -84,6 +84,9 @@ func (r *bytesReader) Read(size uint64) ([]byte, error) {
 	// TODO(pwaller): Ideally, we'd set this on the underlying reader, but
 	// 				  we assume that we own it for now.
 	// r.prevRune = -1
+	if *r.i+int(size) >= len(r.s) {
+		size = uint64(len(r.s) - int(*r.i))
+	}
 	result := r.s[*r.i : *r.i+int(size)]
 	*r.i += int(size)
 	return result, nil
